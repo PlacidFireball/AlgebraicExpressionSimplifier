@@ -1,0 +1,7 @@
+# Project exclude paths
+/project/target/
+/target/
+/null/
+*.xml
+*.iml
+*.json
