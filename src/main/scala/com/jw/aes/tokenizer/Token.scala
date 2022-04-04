@@ -14,7 +14,6 @@ class TokenType extends Enumeration {
 
 }
 
-
 class Token(var stringData : String = "", var tokenType : TokenType#Value) {
 
 }

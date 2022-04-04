@@ -1,5 +1,6 @@
 package com.jw.aes.tokenizer
 
+import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks._
 
 
@@ -17,27 +18,29 @@ class Tokenizer(src : String) {
   }
 
   def tokenize() : List[Token] = {
+    val tokenBuff : ListBuffer[Token] = new ListBuffer()
     while (idx < src.length) {
       consumeWhiteSpace()
       val varToken = tokenizeVar()
       val numToken = tokenizeNum()
       val syntaxToken = tokenizeSyntax()
       if (varToken.isDefined) {
-        tokenList = varToken.get :: tokenList
+        tokenBuff += varToken.get
       }
       else if (numToken.isDefined) {
-        tokenList = numToken.get :: tokenList
+        tokenBuff += numToken.get
       }
       else if (syntaxToken.isDefined) {
-        tokenList = varToken.get :: tokenList
+        tokenBuff += syntaxToken.get
       }
       else {
         val tokenType = new TokenType().Error
         val syntaxErrorToken = new Token(src(idx).toString, tokenType)
         idx += 1
-        tokenList = syntaxErrorToken :: tokenList
+        tokenBuff += syntaxErrorToken
       }
     }
+    tokenList = tokenBuff.toList
     tokenList
   }
 
@@ -67,6 +70,7 @@ class Tokenizer(src : String) {
 
   // tokenize any c \in \Z
   def tokenizeNum() : Option[Token] = {
+    if (idx >= src.length) return None
     if (src(idx).isDigit) {
       var digits = ""
       while (src(idx).isDigit) {
@@ -96,6 +100,9 @@ class Tokenizer(src : String) {
   }
   // tokenize () + - * /
   def tokenizeSyntax() : Option[Token] = {
+    if (idx >= src.length) return None
+
+
 
     None
 
@@ -139,4 +146,26 @@ class Tokenizer(src : String) {
   }
   // TODO: This code feels really gronky
   def tokenIsError(tokenType : TokenType#Value) = tokenType.equals(new TokenType().Error)
+
+  override def toString: String = {
+    if (idx >= src.length) {
+      src + "-->[]<--"
+    } else {
+      val end : String = if (idx == src.length -1) {
+        ""
+      } else {
+        src.substring(idx+1, src.length -1)
+      }
+      src.substring(0, idx) + "-->["+src(idx) +"]<--" + end
+    }
+  }
 }
+/*
+* if (tokenizationEnd()) {
+            return src + "-->[]<--";
+        } else {
+            return src.substring(0, position) + "-->[" + peek() + "]<--" +
+                    ((position == src.length() - 1) ? "" :
+                            src.substring(position + 1, src.length() - 1));
+        }
+* */

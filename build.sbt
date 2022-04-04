@@ -6,3 +6,6 @@ lazy val root = (project in file("."))
   .settings(
     name := "AlgebraicExpressionSimplifier"
   )
+
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.11"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.11" % "test"
