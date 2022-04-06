@@ -40,6 +40,7 @@ class Tokenizer(src : String) {
         tokenBuff += syntaxErrorToken
       }
     }
+    tokenBuff += new Token("<EOF>", new TokenType().End)
     tokenList = tokenBuff.toList
     tokenList
   }
@@ -101,11 +102,25 @@ class Tokenizer(src : String) {
   // tokenize () + - * /
   def tokenizeSyntax() : Option[Token] = {
     if (idx >= src.length) return None
-
-
-
+    if (src(idx) == '(') {
+      Some(new Token("(", new TokenType().LeftParen))
+    }
+    else if (src(idx) == ')') {
+      Some(new Token(")", new TokenType().RightParen))
+    }
+    else if (src(idx) == '*') {
+      Some(new Token("*", new TokenType().Star))
+    }
+    else if (src(idx) == '/') {
+      Some(new Token(")", new TokenType().Slash))
+    }
+    else if (src(idx) == '+') {
+      Some(new Token("+", new TokenType().Plus))
+    }
+    else if (src(idx) == '-') {
+      Some(new Token("-", new TokenType().Minus))
+    }
     None
-
   }
 
   def newVarToken(power : Char): Option[Token] = {
@@ -151,21 +166,10 @@ class Tokenizer(src : String) {
     if (idx >= src.length) {
       src + "-->[]<--"
     } else {
-      val end : String = if (idx == src.length -1) {
-        ""
-      } else {
-        src.substring(idx+1, src.length -1)
-      }
+      val end : String = if (idx == src.length - 1)
+      { "" }
+      else { src.substring(idx+1, src.length -1) }
       src.substring(0, idx) + "-->["+src(idx) +"]<--" + end
     }
   }
 }
-/*
-* if (tokenizationEnd()) {
-            return src + "-->[]<--";
-        } else {
-            return src.substring(0, position) + "-->[" + peek() + "]<--" +
-                    ((position == src.length() - 1) ? "" :
-                            src.substring(position + 1, src.length() - 1));
-        }
-* */
