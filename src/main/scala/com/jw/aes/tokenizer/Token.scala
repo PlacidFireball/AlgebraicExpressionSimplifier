@@ -1,6 +1,5 @@
 package com.jw.aes.tokenizer
 
-
 class TokenType extends Enumeration {
   type TokenType = Value
   val Constant, Linear, Quadratic, Cubic,

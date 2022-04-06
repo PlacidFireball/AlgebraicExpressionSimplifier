@@ -5,6 +5,7 @@ import com.jw.aes.tokenizer.Tokenizer
 class Parser(tokens : List[Token]) {
   private var currTok : Int = 0
 
+
   def parse() : Unit = {
 
   }
