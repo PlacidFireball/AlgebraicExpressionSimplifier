@@ -5,35 +5,38 @@ import scala.util.control.Breaks._
 
 
 class Tokenizer(src : String) {
-  var idx : Int = 0
-  var tokenList : List[Token] = List()
+  private var idx : Int = 0
+  private var tokenList : List[Token] = List()
   lazy val hasErrors: Boolean = {
     var flag = false
     for (token <- tokenList) {
-      if (token.tokenType.equals(new TokenType().Error)) {
+      if (token.tokenIs("Error")) {
         flag = true
       }
     }
     flag
   }
 
+  def getTokenList : List[Token] = tokenList
+
   def tokenize() : List[Token] = {
+    if (tokenList.nonEmpty) return tokenList
     val tokenBuff : ListBuffer[Token] = new ListBuffer()
     while (idx < src.length) {
       consumeWhiteSpace()
       val varToken = tokenizeVar()
-      val numToken = tokenizeNum()
-      val syntaxToken = tokenizeSyntax()
       if (varToken.isDefined) {
         tokenBuff += varToken.get
       }
-      else if (numToken.isDefined) {
+      val numToken = tokenizeNum()
+      if (numToken.isDefined) {
         tokenBuff += numToken.get
       }
-      else if (syntaxToken.isDefined) {
+      val syntaxToken = tokenizeSyntax()
+      if (syntaxToken.isDefined) {
         tokenBuff += syntaxToken.get
       }
-      else {
+      if (syntaxToken.isEmpty && numToken.isEmpty && varToken.isEmpty) {
         val tokenType = new TokenType().Error
         val syntaxErrorToken = new Token(src(idx).toString, tokenType)
         idx += 1
@@ -49,7 +52,7 @@ class Tokenizer(src : String) {
   ///    Helper functions     ///
   ///////////////////////////////
 
-  def tokenizeVar() : Option[Token] = {
+  private def tokenizeVar() : Option[Token] = {
     /// Tokenize x^n
     if (matchCharAndConsume('x')) {
       if (matchCharAndConsume('^')) {
@@ -70,17 +73,17 @@ class Tokenizer(src : String) {
   }
 
   // tokenize any c \in \Z
-  def tokenizeNum() : Option[Token] = {
+  private def tokenizeNum() : Option[Token] = {
     if (idx >= src.length) return None
     if (src(idx).isDigit) {
       var digits = ""
-      while (src(idx).isDigit) {
+      while (idx < src.length && src(idx).isDigit) {
         digits += src(idx)
         idx += 1
       }
       var exponentDigits = ""
       if (matchCharAndConsume('^')) {
-        while (src(idx).isDigit) {
+        while (idx < src.length && src(idx).isDigit) {
           exponentDigits += src(idx)
           idx += 1
         }
@@ -100,30 +103,36 @@ class Tokenizer(src : String) {
 
   }
   // tokenize () + - * /
-  def tokenizeSyntax() : Option[Token] = {
+  private def tokenizeSyntax() : Option[Token] = {
     if (idx >= src.length) return None
     if (src(idx) == '(') {
-      Some(new Token("(", new TokenType().LeftParen))
+      idx += 1
+      return Some(new Token("(", new TokenType().LeftParen))
     }
     else if (src(idx) == ')') {
-      Some(new Token(")", new TokenType().RightParen))
+      idx += 1
+      return Some(new Token(")", new TokenType().RightParen))
     }
     else if (src(idx) == '*') {
-      Some(new Token("*", new TokenType().Star))
+      idx += 1
+      return Some(new Token("*", new TokenType().Star))
     }
     else if (src(idx) == '/') {
-      Some(new Token(")", new TokenType().Slash))
+      idx += 1
+      return Some(new Token("-", new TokenType().Slash))
     }
     else if (src(idx) == '+') {
-      Some(new Token("+", new TokenType().Plus))
+      idx += 1
+      return Some(new Token("+", new TokenType().Plus))
     }
     else if (src(idx) == '-') {
-      Some(new Token("-", new TokenType().Minus))
+      idx += 1
+      return Some(new Token("-", new TokenType().Minus))
     }
     None
   }
 
-  def newVarToken(power : Char): Option[Token] = {
+  private def newVarToken(power : Char): Option[Token] = {
     val strVal = "x^"+power
     val tokenType = if (power == '2') {
       new TokenType().Quadratic
@@ -136,7 +145,7 @@ class Tokenizer(src : String) {
     }
     Some(new Token(strVal, tokenType))
   }
-  def consumeWhiteSpace() : Unit = {
+  private def consumeWhiteSpace() : Unit = {
     breakable {
       while (src(idx).isWhitespace) {
         idx += 1
@@ -146,12 +155,12 @@ class Tokenizer(src : String) {
       }
     }
   }
-  def matchChar(needle : Char) : Boolean = {
+  private def matchChar(needle : Char) : Boolean = {
     if (idx >= src.length) return false
     if (src(idx) == needle) true
     else false
   }
-  def matchCharAndConsume(needle : Char) : Boolean = {
+  private def matchCharAndConsume(needle : Char) : Boolean = {
     if (idx >= src.length) return false
     if (matchChar(needle)) {
       this.idx += 1
@@ -159,8 +168,6 @@ class Tokenizer(src : String) {
     }
     false
   }
-  // TODO: This code feels really gronky
-  def tokenIsError(tokenType : TokenType#Value) = tokenType.equals(new TokenType().Error)
 
   override def toString: String = {
     if (idx >= src.length) {
