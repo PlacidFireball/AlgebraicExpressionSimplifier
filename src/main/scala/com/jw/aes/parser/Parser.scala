@@ -41,7 +41,7 @@ class Parser(tokens : List[Token]) {
 
   def parseVariable : Expression = {
     if (matchOneOf(List("Linear", "Quadratic", "Cubic", "Quartic"))) {
-
+      new FactorExpression()
     }
     else {
       parseConstant
@@ -49,7 +49,7 @@ class Parser(tokens : List[Token]) {
   }
 
   def parseConstant : Expression = {
-
+    new FactorExpression()
   }
 
 
