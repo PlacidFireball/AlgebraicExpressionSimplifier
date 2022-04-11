@@ -3,7 +3,6 @@ package com.jw.aes.tokenizer
 import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks._
 
-
 class Tokenizer(src : String) {
   private var idx : Int = 0
   private var tokenList : List[Token] = List()

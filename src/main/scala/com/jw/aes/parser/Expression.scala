@@ -1,5 +1,9 @@
 package com.jw.aes.parser
 
-class Expression {
+import com.jw.aes.tokenizer.Token
 
+import scala.collection.mutable.ListBuffer
+
+abstract class Expression {
+  def evaluate() : Unit
 }
